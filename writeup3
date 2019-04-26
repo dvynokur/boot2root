@@ -1,0 +1,97 @@
+Launch given .iso file with .
+
+Scan for its IP adress using ifconfig command in terminal.
+
+Desired IP adress starts with "192.168".
+In our case, it is 192.168.140.1.
+
+Then we need to find the open ports on this system. To perform it we can use Nmap tool. If it is not installed on the machine, type:
+
+"brew install nmap"
+
+Scan a range of IPs starting with an IP address found step before. Type in terminal:
+
+"nmap 192.168.140.1-255"
+
+We receive available ports on the system. Our output:
+
+> nmap 192.168.140.1-255
+> Starting Nmap 7.70 ( https://nmap.org ) at 2019-04-25 14:05 EEST
+> Nmap scan report for 192.168.140.1
+> Host is up (0.00046s latency).
+> Not shown: 996 closed ports
+> PORT     STATE SERVICE
+> 22/tcp   open  ssh
+> 88/tcp   open  kerberos-sec
+> 3283/tcp open  netassistant
+> 5900/tcp open  vnc
+> 
+> Nmap scan report for 192.168.140.134
+> Host is up (0.00072s latency).
+> Not shown: 994 filtered ports
+> PORT    STATE SERVICE
+> 21/tcp  open  ftp
+> 22/tcp  open  ssh
+> 80/tcp  open  http
+> 143/tcp open  imap
+> 443/tcp open  https
+> 993/tcp open  imaps
+
+
+We have an open http port (80) for 192.168.140.134. So we can look for existing Web Objects. To do it we use DIRB package (github.com/v0re/dirb.git). To install it (if not yet installed) just clone the repo and "make" the programm:
+
+1) "git clone https://github.com/v0re/dirb.git"
+2) "dirb"
+3) "./configure"
+4) "make"
+
+To find the entries launch the following:
+
+"./dirb https://192.168.140.134/ wordlists/common.txt"
+
+It gives us many web directories, main of them are: 
+	
+	- https://192.168.140.134/phpmyadmin/
+	- https://192.168.140.134/webmail/
+	- https://192.168.140.134/forum/
+
+Let's explore them. https://192.168.140.134/phpmyadmin/ requires login and password. The same thing for https://192.168.140.134/webmail/. Let's try to find some information on the forum (https://192.168.140.134/forum/). There are four topics on the forum. We observe the topic "Probleme login ?". We can find Failed password for invalid user !q\]Ej?*5K5cy*AJ
+
+> Oct 5 08:45:29 BornToSecHackMe sshd[7547]: Failed password for invalid user !q\]Ej?*5K5cy*AJ from 161.202.39.38 port 57764 ssh2
+
+A little bit later, on Oct 5 08:46:01, the session was opened for user lmezard:
+
+> Oct 5 08:46:01 BornToSecHackMe CRON[7549]: pam_unix(cron:session): session opened for user lmezard by (uid=1040)
+
+We can assume that invalid user !q\]Ej?*5K5cy*AJ actually is a password for lmezard user. Try to login. It is 
+successful. After login we can look for some information in the lmezard profile. We have here just an E-mail address: laurie@borntosec.net
+
+Now with this E-mail address we can try to get the mail of lmezard accessing to the page https://192.168.140.134/webmail/ we found earlier with DIRB.
+
+Successful. Here we have two mails. One of them is called "DB Access". Inside we have:
+
+> Hey Laurie,
+> You cant connect to the databases now. Use root/Fg-'kKXBj87E:aJ$
+> Best regards.
+
+We can try to use this login and password to acces the third directory found using DIRB - https://192.168.140.134/phpmyadmin/. Use login root and password Fg-'kKXBj87E:aJ$
+Login successful. 
+
+PHP-MyAdmin is a GUI based interface for MySQL database. Next step we will to try to attack this database to access shell.
+We will use command shell_exec — Execute command via shell and return the complete output as a string.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"brew install inetutils"

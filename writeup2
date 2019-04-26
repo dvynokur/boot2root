@@ -1,0 +1,18 @@
+The second way is manualy launch Linux kernel and initrd. 
+
+Linux kernel executable is "vmlinuz" file. It is capable of loading the operating system into memory so that the computer becomes usable and application programs can be run. 
+vmlinuz (= Virtual Memory LINUx gZip) is compressed  Linux kernel Executable.
+It could be found in /casper/vmlinus. To load the Linux kernel it is needed to specify parameter "boot=casper".
+Initrd (= initial RAMdisk) is a scheme for loading a temporary root file system into memory, which may be used as part of the Linux startup process. It is stored in "/casper/initrd.gz".
+
+To perform such a way needed to get boot menu by holding "shift" key during the launching given .iso file in the Virtual Box. Then type:
+
+
+"/casper/vmlinuz boot=casper initrd=/casper/initrd.gz -- init=/bin/sh"
+
+or 
+
+"/casper/vmlinuz boot=casper initrd=/casper/initrd.gz -- init=/bin/bash"
+
+
+Check root privileges by typing "whoami".

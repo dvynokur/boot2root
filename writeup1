@@ -1,0 +1,37 @@
+Method 1. Using GRUB (boot menu) to invoke bash
+
+Press and hold "Shift" key to get boot menu. 
+
+Type "live init=/bin/bash" or "live init=/bin/sh"
+
+it told kernel to specifically run the command specified in parameter instead of working on normal routine
+
+
+
+
+# oter
+
+# Find Linux Kernel Version
+
+1 method:
+uname -r # Current Linux version
+uname -mrs
+
+2 method:
+cat /proc/version
+
+lsb_release -a # Display your current Linux distribution name and version
+
+find the users which belong to the root group in the /etc/group file which stores group information or defines the user groups:
+
+cat /etc/group | grep :0:
+
+#find the users which belong to the sudo group ...:
+
+cat /etc/group | grep sudo # ft_root
+
+#same but with admin group:
+
+cat /etc/group | grep admin #ft_root
+
+# to reboot: reboot -f
