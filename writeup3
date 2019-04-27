@@ -199,7 +199,7 @@ As a result, we have the directory ft_fun.
 
 > 		751    6752   45011
 
-Here we have 751 files. Example:
+Here we have 750 files. Example:
 
 "cat 99VAL.pcap"
 
@@ -208,4 +208,67 @@ Here we have 751 files. Example:
 
 > //file60%
 
-In every file we have a line of some code and the number of this file. We can guess that we can combine these files to have this code. First we need to arrange these files according their numbers in ascending order.
+In every file we have a line of some code and the number of this file. We can guess that we can combine these files to have this code. First we need to arrange these files according their numbers in ascending order. Let's use this script to rename the files as they are in their content after "//file":
+
+
+"for file in *.pcap; do
+text="$(grep -a "//file" "$file" | awk -F '//file' '{print $2}')"
+grep -v "//file" "$file" > temp && mv temp "$file"
+mv "$file" "$text.pcap"
+done"
+
+
+Then concatenate all the files in ascending order:
+
+
+"cat $(find ./ -name "*.pcap" | sort -V) > code.cpp"
+
+
+We received file with a code. Now let's compile and execute it:
+
+"gcc newfile.cpp"
+"./a.out"
+
+> MY PASSWORD IS: Iheartpwnage
+> Now SHA-256 it and submit
+
+Let's generate SHA-256 encription of this password using https://emn178.github.io/online-tools/sha256.html
+
+The result is:
+330b845f32185747e4f8ca15d40ca59796035c89ea809fb5d30f4da83ecf45a4
+
+
+Now we will follow instructions in README and will try to login in ssh with login laurie and this coded password.
+
+"ssh laurie@10.111.1.24"
+
+"ls"
+> bomb  README
+
+Let's check what the types of files do we have:
+
+"file README"
+> README: ASCII text
+
+"file bomb"
+> bomb: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.0.0, not stripped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
