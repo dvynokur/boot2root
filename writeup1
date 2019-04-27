@@ -1,15 +1,17 @@
 Method 1. Using GRUB (boot menu) to invoke bash
 
-Press and hold "Shift" key to get boot menu. 
+Boot up the .iso file using VMBox, and after the VMBox launch screen, hold down the left Shift key to get to boot menu.
 
-Type "live init=/bin/bash" or "live init=/bin/sh"
+Type "live init=/bin/bash" or "live init=/bin/sh". This command tells the Linux kernel to run /bin/bash as init, rather than the system init.
+//https://www.redhat.com/archives/rhl-list/2005-March/msg04089.html
 
-it told kernel to specifically run the command specified in parameter instead of working on normal routine
+Check root privileges by typing "whoami".
+
+The answer is: 
+> root
 
 
-
-
-# oter
+## After getting the rights of root (superadmin) you can try to get to some account in the system.
 
 # Find Linux Kernel Version
 
@@ -20,18 +22,55 @@ uname -mrs
 2 method:
 cat /proc/version
 
-lsb_release -a # Display your current Linux distribution name and version
+`lsb_release -a` # Display your current Linux distribution name and version
 
 find the users which belong to the root group in the /etc/group file which stores group information or defines the user groups:
 
-cat /etc/group | grep :0:
+`cat /etc/group | grep :0:`
 
 #find the users which belong to the sudo group ...:
 
-cat /etc/group | grep sudo # ft_root
+`cat /etc/group | grep sudo # ft_root`
 
 #same but with admin group:
 
-cat /etc/group | grep admin #ft_root
+`cat /etc/group | grep admin #ft_root`
 
 # to reboot: reboot -f
+
+## Login into any account
+
+1. You need to know the name of user. 
+
+after you have root rights you can see the system files by using commands: 
+
+> cat /etc/group - shows all existing groups in the system
+the structure of the file is `group name:password:GID:list of users`
+//https://w3tls.net/toQh039c0a244fc0b107abfe9555a26a0ec8ba.png
+
+> cat /etc/passwd - shows login, user_id, group_id, name, download directory
+//https://w3tls.net/toQh03c33db99e94e8883fb84b8a67923de2f6.png
+
+> cat /etc/shadow - shows 
+Username : It is your login name.
+Password : It is your encrypted password. The password should be minimum 8-12 characters long including special characters, digits, lower case alphabetic and more. Usually password format is set to $id$salt$hashed, The $id is the algorithm used On GNU/Linux as follows:
+$1$ is MD5
+$2a$ is Blowfish
+$2y$ is Blowfish
+$5$ is SHA-256
+$6$ is SHA-512
+Last password change (lastchanged) : Days since Jan 1, 1970 that password was last changed
+Minimum : The minimum number of days required between password changes i.e. the number of days left before the user is allowed to change his/her password
+Maximum : The maximum number of days the password is valid (after that user is forced to change his/her password)
+Warn : The number of days before password is to expire that user is warned that his/her password must be changed
+Inactive : The number of days after password expires that account is disabled
+Expire : days since Jan 1, 1970 that account is disabled i.e. an absolute date specifying when the login may no longer be used.
+//https://w3tls.net/toQh039fe89ef36cb65817720e1fa9ba75c406.png
+
+2. To delete password you need to:
+- choose some login;
+- find him in group file and using vim delete password (the second part of the string);
+- in file shadow delete all information after the second semicolon, but leave all other semicolons, also using vim.
+
+3. After that you can use `login user_name` comand to login the system. 
+
